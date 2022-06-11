@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -22,6 +23,7 @@ namespace WebApplication6.Models
         public virtual DbSet<Country> Countries { get; set; }
         public virtual DbSet<CountryTrip> CountryTrips { get; set; }
         public virtual DbSet<Trip> Trips { get; set; }
+        public IEnumerable<object> Client { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
