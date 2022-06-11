@@ -22,5 +22,14 @@ namespace WebApplication6.Controllers
             var trips = await _dbService.GetTrips();
             return Ok(trips);
         }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteTrips(int id)
+        {
+            await _dbService.RemoveTrip(id);
+            return Ok("Removed Trip");
+
+        }
     }
 }

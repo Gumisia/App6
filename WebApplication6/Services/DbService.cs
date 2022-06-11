@@ -27,7 +27,19 @@ namespace WebApplication6.Services
                 DateTo = e.DateTo,
                 Countries = e.CountryTrips.Select(e => new SomeSortOfCountry {  Name = e.IdCountryNavigation.Name}).ToList(),
                 CLients = e.ClientTrips.Select(e=> new SomeSortOfClient { FirstName = e.IdClientNavigation.FirstName, LastName = e.IdClientNavigation.LastName}).ToList()
-            }).ToListAsync();
+            }).OrderByDescending(e => e.DateFrom).ToListAsync();
+        }
+
+        public async Task RemoveTrip(int id)
+        {
+         //   var trip = _dbContext.Trips.Where(e => e.IdTrip == id).FirstOrDefaultAsync();
+         //
+
+            var trip = new Trip() { IdTrip = id };
+
+            _dbContext.Attach(trip);
+            _dbContext.Remove(trip);
+            await _dbContext.SaveChangesAsync(); // dopiero po tym zapisuje do bazy
         }
     }
 }
