@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApplication6.Services;
 
 namespace WebApplication6
 {
@@ -28,6 +29,7 @@ namespace WebApplication6
         {
 
             services.AddDbContext<Models.s17461Context>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
+            services.AddScoped<IDbService, DbService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
