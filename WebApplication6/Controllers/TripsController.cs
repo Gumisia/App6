@@ -24,14 +24,14 @@ namespace WebApplication6.Controllers
             return Ok(trips);
         }
 
-        [HttpDelete]
+        /*[HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteTrips(int id)
         {
             await _dbService.RemoveTrip(id);
             return Ok("Removed Trip");
 
-        }
+        }*/
 
         [HttpPost]
         [Route("{id}/clients")]

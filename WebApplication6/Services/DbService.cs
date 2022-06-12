@@ -55,9 +55,15 @@ namespace WebApplication6.Services
             return true;
         }
 
-        public Task<bool> DoesClientHasTrip(string firstName, string lastName, int id)
+        public async Task<bool> DoesClientHasTrip(string firstName, string lastName, int id)
         {
-            throw new System.NotImplementedException();
+            var klient = await _dbContext.Clients.FromSqlRaw("" +
+                "SELECT * " +
+                "FROM Client " +
+                "WHERE firstName={0}" +
+                "AND NOT EXISTS (SELECT 1 FROM Client_Trip WHERE IdClient={1})", firstName,  id).SingleOrDefaultAsync();
+            if (klient == null) return true;
+            return false;
         }
 
         public async Task<bool> DoesKlientExist(string pesel)
