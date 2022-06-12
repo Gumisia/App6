@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
+using WebApplication6.Models;
 using WebApplication6.Models.DTO;
 using WebApplication6.Services;
 
@@ -38,17 +40,24 @@ namespace WebApplication6.Controllers
 
         public async Task<IActionResult> PostClientTrip(int id, SomeSortOfClientTrip someSortOfClientTrip)
         {
+            Client client = null;
             try
             {
-                if (!await _dbService.DoesKlientExist(someSortOfClientTrip.Pesel)){
-                    await _dbService.AddClient(someSortOfClientTrip.FirstName, someSortOfClientTrip.LastName, someSortOfClientTrip.Email, someSortOfClientTrip.Telephone, someSortOfClientTrip.Pesel);
+                client = await _dbService.GetClientIfExists(someSortOfClientTrip.Pesel);
+                if (client == null){
+                    client = await _dbService.AddClient(someSortOfClientTrip.FirstName, someSortOfClientTrip.LastName, someSortOfClientTrip.Email, someSortOfClientTrip.Telephone, someSortOfClientTrip.Pesel);
+                }
+                if (!await _dbService.DoesTripExist(id, someSortOfClientTrip.TripName))
+                {
+                    return NotFound("Wycieczka nie istnieje");
                 }
 
-                if (!await _dbService.DoesClientHasTrip(someSortOfClientTrip.FirstName, someSortOfClientTrip.LastName, id)) return Conflict("Klient ma tę wycieczkę");
-                if (!await _dbService.DoesTripExist(id, someSortOfClientTrip.TripName)) return NotFound("Wycieczka nie istnieje");
-
-                await _dbService.AddClientTrip(id, someSortOfClientTrip);
-                return Ok("Client trip added");
+                if (!await _dbService.DoesClientHasTrip(client, id))
+                {
+                    return Conflict("Klient jest już zapisany na tę wycieczkę.");
+                }
+                var response = await _dbService.AddClientTrip(client.IdClient, id, someSortOfClientTrip.PaymentDate);
+                return Ok(response);
             }catch(System.Exception ex)
             {
                 return BadRequest(ex.Message);

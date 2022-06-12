@@ -4,6 +4,8 @@ using WebApplication6.Models.DTO;
 using WebApplication6.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System;
+using System.Globalization;
 
 namespace WebApplication6.Services
 {
@@ -16,9 +18,9 @@ namespace WebApplication6.Services
             _dbContext = dbContext;
         }
 
-        public async Task<bool> AddClient(string firstName, string lastName, string email, string telephone, string pesel)
+        public async Task<Client> AddClient(string firstName, string lastName, string email, string telephone, string pesel)
         {
-            var addClient = new Client
+            var client = new Client
             {
                 FirstName = firstName,
                 LastName = lastName,
@@ -26,9 +28,9 @@ namespace WebApplication6.Services
                 Telephone = telephone,
                 Pesel = pesel
             };
-            _dbContext.Add(addClient);
+            _dbContext.Add(client);
             await _dbContext.SaveChangesAsync();
-            return true;
+            return client;
         }
 
         public async Task<bool> AddClientTrip(int id, SomeSortOfClientTrip request)
@@ -55,27 +57,27 @@ namespace WebApplication6.Services
             return true;
         }
 
-        public async Task<bool> DoesClientHasTrip(string firstName, string lastName, int id)
+        public async Task<bool> DoesClientHasTrip(Client client, int tripId)
         {
             var klient = await _dbContext.Clients.FromSqlRaw("" +
                 "SELECT * " +
                 "FROM Client " +
-                "WHERE firstName={0} AND lastName={1}" +
-                "AND NOT EXISTS (SELECT 1 FROM Client_Trip WHERE IdClient={2})", firstName, lastName, id).SingleOrDefaultAsync();
-            if (klient == null) return true;
-            return false;
+                $"WHERE Client.IdClient = {client.IdClient}" +
+                $"AND EXISTS (SELECT 1 FROM Client_Trip WHERE Client_Trip.IdClient={client.IdClient} AND Client_Trip.IdTrip={tripId})").SingleOrDefaultAsync();
+            if (klient == null) return false;
+            return true;
         }
 
-        public async Task<bool> DoesKlientExist(string pesel)
+        public async Task<Client> GetClientIfExists(string pesel)
         {
             var klient = await _dbContext.Clients.Where(e => e.Pesel == pesel).FirstOrDefaultAsync();
-            if (klient is null) return false;
-            return true;
+            if (klient is null) return null;
+            return klient;
         }
 
         public async Task<bool> DoesTripExist(int id, string tripName)
         {
-            var _trip = await _dbContext.Trips.Where(e => e.Name == tripName).FirstOrDefaultAsync();
+            var _trip = await _dbContext.Trips.Where(e => e.Name == tripName).Where(e => e.IdTrip == id).FirstOrDefaultAsync();
             if (_trip is null) return false;
             return true;
         }
@@ -132,9 +134,28 @@ namespace WebApplication6.Services
             await _dbContext.SaveChangesAsync(); // dopiero po tym zapisuje do bazy
         }
 
-        Task<string> IDbService.AddClientTrip(int id, SomeSortOfClientTrip request)
+        public async Task<string> AddClientTrip(int clientId, int tripId, string PaymentDate)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                var clientTrip = new ClientTrip
+                {
+                    IdClient = clientId,
+                    IdTrip = tripId,
+                    PaymentDate = PaymentDate != "" ? DateTime.ParseExact(PaymentDate, "yyyy/MM/dd", null) : null,
+                    RegisteredAt = DateTime.Now
+                };
+
+                _dbContext.Add(clientTrip);
+                await _dbContext.SaveChangesAsync();
+
+                return "Dodano wycieczke";
+            } catch
+            {
+                return "Nie udało się dodać wycieczki";
+            }
+
+
         }
     }
 }

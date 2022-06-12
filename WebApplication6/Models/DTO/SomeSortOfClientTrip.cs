@@ -12,7 +12,7 @@ namespace WebApplication6.Models.DTO
         public string Pesel { get; set; }
         public int IdTrip { get; set; }
         public string TripName { get; set; }
-        public DateTime? PaymentDate { get; set; }
+        public string? PaymentDate { get; set; }
 
     }
 }
