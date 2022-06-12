@@ -60,8 +60,8 @@ namespace WebApplication6.Services
             var klient = await _dbContext.Clients.FromSqlRaw("" +
                 "SELECT * " +
                 "FROM Client " +
-                "WHERE firstName={0}" +
-                "AND NOT EXISTS (SELECT 1 FROM Client_Trip WHERE IdClient={1})", firstName,  id).SingleOrDefaultAsync();
+                "WHERE firstName={0} AND lastName={1}" +
+                "AND NOT EXISTS (SELECT 1 FROM Client_Trip WHERE IdClient={2})", firstName, lastName, id).SingleOrDefaultAsync();
             if (klient == null) return true;
             return false;
         }
